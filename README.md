@@ -1,5 +1,9 @@
 # ebook
 
+[training from imooc](https://www.imooc.com/video/17794)
+
+vue-cli3
+
 ## Project setup
 ```
 yarn install
