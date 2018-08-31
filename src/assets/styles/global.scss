@@ -1,0 +1,20 @@
+@import 'reset';
+
+//设置一个常量
+$fontSize: 37.5;
+@function px2rem($px) {
+    /*
+    1rem = fontSize px
+    1px = (1 / fontSize) * rem
+    */
+    @return ($px / $fontSize) + rem;
+}
+
+/**
+垂直水平都居中
+*/
+@mixin center() {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

@@ -1,5 +1,21 @@
 # ebook
 
-https://www.imooc.com/video/17794
+## Project setup
+```
+yarn install
+```
 
-vue-cli3
+### Compiles and hot-reloads for development
+```
+yarn run serve
+```
+
+### Compiles and minifies for production
+```
+yarn run build
+```
+
+### Lints and fixes files
+```
+yarn run lint
+```
