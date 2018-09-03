@@ -74,7 +74,7 @@ export default {
           style: {
             body: {
               color: "#000",
-              background: "rga(241,236,226)"
+              background: "rgba(241,236,226)"
             }
           }
         }
