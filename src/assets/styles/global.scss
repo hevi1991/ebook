@@ -1,5 +1,4 @@
-@import 'reset';
-
+@import 'reset.scss';
 //设置一个常量
 $fontSize: 37.5;
 @function px2rem($px) {
@@ -7,14 +6,45 @@ $fontSize: 37.5;
     1rem = fontSize px
     1px = (1 / fontSize) * rem
     */
-    @return ($px / $fontSize) + rem;
+    @return ($px / $fontSize)+rem;
 }
 
 /**
 垂直水平都居中
 */
+
 @mixin center() {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.icon {
+    color: #333;
+    font-size: px2rem(20);
+}
+
+//transition过渡
+.slide-down-enter,
+.slide-down-leave-to {
+    transform: translate(0, -100%);
+}
+
+.slide-down-enter-to,
+.slide-down-leave,
+.slide-up-enter-to,
+.slide-up-leave {
+    transform: translate(0, 0);
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active,
+.slide-up-enter-active,
+.slide-up-leave-active {
+    transition: all 0.3s linear;
+}
+
+.slide-up-enter,
+.slide-up-leave-to {
+    transform: translate(0, 100%);
 }
