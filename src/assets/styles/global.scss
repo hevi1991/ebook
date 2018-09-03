@@ -46,5 +46,5 @@ $fontSize: 37.5;
 
 .slide-up-enter,
 .slide-up-leave-to {
-    transform: translate(0, 100%);
+    transform: translate(0, px2rem(96));
 }

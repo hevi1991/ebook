@@ -1,17 +1,6 @@
 <template>
   <div class="ebook">
-    <transition name="slide-down">
-      <div class="title-wrapper" v-show="ifTitleAndMenuShow">
-        <div class="left">
-          <span class="icon icon-arrow-left"></span>
-        </div>
-        <div class="right">
-          <div class="icon-wrapper"><span class="icon icon-cart"></span></div>
-          <div class="icon-wrapper"><span class="icon icon-user"></span></div>
-          <div class="icon-wrapper"><span class="icon icon-menu"></span></div>
-        </div>
-      </div>
-    </transition>
+    <title-bar :show="ifTitleAndMenuShow" />
     <div class="read-wrapper">
         <div id="read"></div>
         <div class="mask">
@@ -20,28 +9,85 @@
             <div class="right" @click="nextPage"></div>
         </div>
     </div>
-    <transition name="slide-up">
-      <div class="menu-wrapper" v-show="ifTitleAndMenuShow">
-        <div class="icon-wrapper"><span class="icon icon-list2"></span></div>
-        <div class="icon-wrapper"><span class="icon icon-pushpin"></span></div>
-        <div class="icon-wrapper"><span class="icon icon-sun"></span></div>
-        <div class="icon-wrapper"><span class="icon icon-font-size"></span></div>
-      </div>
-    </transition>
+    <!-- 绑定ref -->
+    <menu-bar :show="ifTitleAndMenuShow" 
+    :fontSizeList="fontSizeList"
+    :defaultFontSize="defaultFontSize" 
+    @setFontSize="setFontSize"
+    :themeList="themeList"
+    :defaultTheme="defaultTheme"
+    @setTheme="setTheme"
+    ref="menuBar" />
   </div>
 </template>
 
 <script>
 import Epub from "epubjs";
+import TitleBar from "@/components/TitleBar";
+import MenuBar from "@/components/MenuBar";
+
 const DOWNLOAD_URL = "/2018_Book_AgileProcessesInSoftwareEngine.epub";
 export default {
   data() {
     return {
-      ifTitleAndMenuShow: false
+      ifTitleAndMenuShow: false,
+      fontSizeList: [
+        { fontSize: 12 },
+        { fontSize: 14 },
+        { fontSize: 16 },
+        { fontSize: 18 },
+        { fontSize: 20 },
+        { fontSize: 22 },
+        { fontSize: 24 }
+      ],
+      defaultFontSize: 16,
+      themeList: [
+        {
+          name: "default",
+          style: {
+            body: {
+              color: "#000",
+              background: "#fff"
+            }
+          }
+        },
+        {
+          name: "eye",
+          style: {
+            body: {
+              color: "#000",
+              background: "#ceeaba"
+            }
+          }
+        },
+        {
+          name: "night",
+          style: {
+            body: {
+              color: "#fff",
+              background: "#000"
+            }
+          }
+        },
+        {
+          name: "gold",
+          style: {
+            body: {
+              color: "#000",
+              background: "rga(241,236,226)"
+            }
+          }
+        }
+      ],
+      defaultTheme: 0
     };
   },
+  components: {
+    TitleBar,
+    MenuBar
+  },
   methods: {
-    // 电子书的解析和渲染
+    // 电子书的解析和渲染 http://epubjs.org/documentation/0.3/#epub
     showEpub() {
       // 生成Book
       this.book = new Epub(DOWNLOAD_URL);
@@ -52,6 +98,15 @@ export default {
       });
       // 通过Rendition.display渲染电子书
       this.rendition.display();
+      // 获取Theme对象
+      this.themes = this.rendition.themes;
+      // 设置默认字体
+      this.setFontSize(this.defaultFontSize);
+      // 渲染主题皮肤（步骤1：注册主题皮肤，步骤2：选择主题皮肤）
+      // this.themes.register(name, styles)
+      // this.themes.select(name)
+      this.registerTheme();
+      this.setTheme(this.defaultTheme);
     },
     prevPage() {
       if (this.rendition) {
@@ -65,6 +120,25 @@ export default {
     },
     toggleTitleAndMenu() {
       this.ifTitleAndMenuShow = !this.ifTitleAndMenuShow;
+      if (this.ifTitleAndMenuShow == false) {
+        // 配合组件的ref属性，可以调用子组件的方法
+        this.$refs.menuBar.hideSetting();
+      }
+    },
+    setFontSize(fontSize) {
+      this.defaultFontSize = fontSize;
+      if (this.themes) {
+        this.themes.fontSize(fontSize + "px");
+      }
+    },
+    registerTheme() {
+      this.themeList.forEach(theme => {
+        this.themes.register(theme.name, theme.style);
+      });
+    },
+    setTheme(index) {
+      this.themes.select(this.themeList[index].name);
+      this.defaultTheme = index;
     }
   },
   mounted() {
@@ -78,33 +152,6 @@ export default {
 
 .ebook {
   position: relative;
-  .icon {
-    cursor: pointer;
-  }
-  .title-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 101;
-    display: flex;
-    width: 100%;
-    height: px2rem(48);
-    background: white;
-    box-shadow: 0 px2rem(8) px2rem(8) rgba(0, 0, 0, 0.15);
-    .left {
-      flex: 0 0 px2rem(60);
-      @include center;
-    }
-    .right {
-      flex: 1;
-      display: flex;
-      justify-content: flex-end;
-      .icon-wrapper {
-        flex: 0 0 px2rem(40);
-        @include center;
-      }
-    }
-  }
   .read-wrapper {
     .mask {
       position: absolute;
@@ -123,21 +170,6 @@ export default {
       .right {
         flex: 0 0 px2rem(100);
       }
-    }
-  }
-  .menu-wrapper {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    z-index: 101;
-    display: flex;
-    width: 100%;
-    height: px2rem(48);
-    background: white;
-    box-shadow: 0 px2rem(-8) px2rem(8) rgba(0, 0, 0, 0.15);
-    .icon-wrapper {
-      flex: 1;
-      @include center;
     }
   }
 }
