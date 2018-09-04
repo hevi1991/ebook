@@ -20,6 +20,8 @@
     :bookAvailable="bookAvailable"
     :progress="progress"
     @onProgressChange="onProgressChange"
+    @jumpTo="jumpTo"
+    :navigation="navigation"
     ref="menuBar" />
   </div>
 </template>
@@ -86,8 +88,9 @@ export default {
       ],
       defaultTheme: 0,
       // 进度滚动
-      bookAvailable: false,//图书是否处于可用状态
-      progress: 0
+      bookAvailable: false, //图书是否处于可用状态
+      progress: 0,
+      navigation: null,
     };
   },
   components: {
@@ -120,26 +123,23 @@ export default {
       this.book.ready
         .then(() => {
           // 当epub初始完成后，生成locations
+          this.navigation = this.book.navigation;
           return this.book.locations.generate();
         })
         .then(() => {
           //这个result是epubfti, epub用于定位电子书位置的标识，当result生成了， 即epubjs对象的locations也生成完成了
           this.locations = this.book.locations;
-          this.bookAvailable = true;//图书加载完成，转为可用
+          this.bookAvailable = true; //图书加载完成，转为可用
         });
     },
     prevPage() {
-      if (this.ifTitleAndMenuShow == true) {
-        this.toggleTitleAndMenu();
-      }
+      this.hideTitleAndMenu();
       if (this.rendition) {
         this.rendition.prev();
       }
     },
     nextPage() {
-      if (this.ifTitleAndMenuShow == true) {
-        this.toggleTitleAndMenu();
-      }
+      this.hideTitleAndMenu();
       if (this.rendition) {
         this.rendition.next();
       }
@@ -175,6 +175,18 @@ export default {
         percentage > 0 ? this.locations.cfiFromPercentage(percentage) : 0;
       this.rendition.display(location);
       this.progress = progress;
+    },
+    //根据链接跳转到指定位置
+    jumpTo(href) {
+      this.rendition.display(href);
+      this.hideTitleAndMenu();
+    },
+    hideTitleAndMenu() {
+      this.ifTitleAndMenuShow = false;
+      // 隐藏菜单弹出的设置栏
+      this.$refs.menuBar.hideSetting();
+      // 隐藏目录
+      this.$refs.menuBar.hideContent();
     }
   },
   mounted() {

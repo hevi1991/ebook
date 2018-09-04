@@ -3,7 +3,7 @@
     <transition name="slide-up">
       <!-- 当字体设置显示时，隐藏阴影 -->
       <div class="menu-wrapper" :class="{'hide-box-shadow': ifSettingShow || !show}" v-show="show">
-        <div class="icon-wrapper"><span class="icon icon-list2"></span></div>
+        <div class="icon-wrapper"><span class="icon icon-list2" @click="showSetting(3)"></span></div>
         <div class="icon-wrapper"><span class="icon icon-pushpin" @click="showSetting(2)"></span></div>
         <div class="icon-wrapper"><span class="icon icon-sun" @click="showSetting(1)"></span></div>
         <div class="icon-wrapper"><span class="icon icon-font-size" @click="showSetting(0)"></span></div>
@@ -55,16 +55,31 @@
         </div>
       </div>
     </transition>
+    <content-view :ifShowContent="ifShowContent"
+                  v-show="ifShowContent"
+                  :navigation="navigation"
+                  :bookAvailable="bookAvailable"
+                  @jumpTo="jumpTo"></content-view>
+    <transition name="fade">
+      <!-- 章节列表弹出后，背后阴影部分 -->
+      <div class="content-mask" v-show="ifShowContent" @click="hideContent"></div>
+    </transition>
   </div>
 </template>
 
 <script>
+import ContentView from "@/components/Content";
+
 export default {
   data() {
     return {
       ifSettingShow: false,
-      showTag: 0
+      showTag: 0,
+      ifShowContent: false
     };
+  },
+  components: {
+    ContentView
   },
   props: {
     show: {
@@ -76,7 +91,8 @@ export default {
     themeList: Array,
     defaultTheme: Number,
     bookAvailable: Boolean,
-    progress: Number
+    progress: Number,
+    navigation: Object
   },
   computed: {
     status() {
@@ -85,8 +101,13 @@ export default {
   },
   methods: {
     showSetting(tag) {
-      this.ifSettingShow = true;
       this.showTag = tag;
+      if (this.showTag === 3) {
+        this.ifSettingShow = false;
+        this.ifShowContent = true;
+      } else {
+        this.ifSettingShow = true;
+      }
     },
     hideSetting() {
       this.ifSettingShow = false;
@@ -99,13 +120,19 @@ export default {
     },
     onProgressChange(progress) {
       this.$emit("onProgressChange", parseInt(progress));
+    },
+    jumpTo(href) {
+      this.$emit("jumpTo", href);
+    },
+    hideContent() {
+      this.ifShowContent = false;
     }
   },
   updated() {
     if (this.$refs.progress) {
       this.$refs.progress.style.backgroundSize = `${this.progress}% 100%`;
     }
-  },
+  }
 };
 </script>
 
@@ -274,6 +301,17 @@ export default {
         text-align: center;
       }
     }
+  }
+
+  .content-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 103;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: rgba(51, 51, 51, 0.8);
   }
 }
 </style>
