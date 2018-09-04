@@ -90,7 +90,7 @@ export default {
       // 进度滚动
       bookAvailable: false, //图书是否处于可用状态
       progress: 0,
-      navigation: null,
+      navigation: null
     };
   },
   components: {
@@ -191,6 +191,19 @@ export default {
   },
   mounted() {
     this.showEpub();
+    // 给左右加翻页功能
+    window.onkeydown = event => {
+      switch (event.keyCode) {
+        case 37: //←
+          this.prevPage();
+          break;
+        case 39: //→
+          this.nextPage();
+          break;
+        default:
+          break;
+      }
+    };
   }
 };
 </script>

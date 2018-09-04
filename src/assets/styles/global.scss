@@ -19,6 +19,10 @@ $fontSize: 37.5;
     align-items: center;
 }
 
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
 .icon {
     color: #333;
     font-size: px2rem(20);

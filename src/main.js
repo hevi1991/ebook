@@ -10,3 +10,7 @@ new Vue({
   router,
   render: h => h(App)
 }).$mount('#app')
+
+// 去除iOS点击高亮效果， 配合global.scss的-webkit-tap-highlight-color: transparent;
+document.body.addEventListener('touchstart', function () {
+});
