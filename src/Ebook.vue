@@ -17,6 +17,9 @@
     :themeList="themeList"
     :defaultTheme="defaultTheme"
     @setTheme="setTheme"
+    :bookAvailable="bookAvailable"
+    :progress="progress"
+    @onProgressChange="onProgressChange"
     ref="menuBar" />
   </div>
 </template>
@@ -31,6 +34,7 @@ export default {
   data() {
     return {
       ifTitleAndMenuShow: false,
+      // 字体大小
       fontSizeList: [
         { fontSize: 12 },
         { fontSize: 14 },
@@ -41,6 +45,7 @@ export default {
         { fontSize: 24 }
       ],
       defaultFontSize: 16,
+      // 主题
       themeList: [
         {
           name: "default",
@@ -74,12 +79,15 @@ export default {
           style: {
             body: {
               color: "#000",
-              background: "rgba(241,236,226)"
+              background: "#F1ECE2"
             }
           }
         }
       ],
-      defaultTheme: 0
+      defaultTheme: 0,
+      // 进度滚动
+      bookAvailable: false,//图书是否处于可用状态
+      progress: 0
     };
   },
   components: {
@@ -107,13 +115,31 @@ export default {
       // this.themes.select(name)
       this.registerTheme();
       this.setTheme(this.defaultTheme);
+      // 获取Location对象
+      // 通过epubjs的钩子函数来实现
+      this.book.ready
+        .then(() => {
+          // 当epub初始完成后，生成locations
+          return this.book.locations.generate();
+        })
+        .then(() => {
+          //这个result是epubfti, epub用于定位电子书位置的标识，当result生成了， 即epubjs对象的locations也生成完成了
+          this.locations = this.book.locations;
+          this.bookAvailable = true;//图书加载完成，转为可用
+        });
     },
     prevPage() {
+      if (this.ifTitleAndMenuShow == true) {
+        this.toggleTitleAndMenu();
+      }
       if (this.rendition) {
         this.rendition.prev();
       }
     },
     nextPage() {
+      if (this.ifTitleAndMenuShow == true) {
+        this.toggleTitleAndMenu();
+      }
       if (this.rendition) {
         this.rendition.next();
       }
@@ -139,6 +165,16 @@ export default {
     setTheme(index) {
       this.themes.select(this.themeList[index].name);
       this.defaultTheme = index;
+    },
+    /**
+     * progress 进度条数值(0-100)
+     */
+    onProgressChange(progress) {
+      const percentage = progress / 100;
+      const location =
+        percentage > 0 ? this.locations.cfiFromPercentage(percentage) : 0;
+      this.rendition.display(location);
+      this.progress = progress;
     }
   },
   mounted() {
